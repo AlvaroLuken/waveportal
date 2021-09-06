@@ -1,25 +1,41 @@
+const { parseEther } = require("ethers/lib/utils");
+
 async function main() {
   const [owner, randoPerson] = await ethers.getSigners();
-  const waveContractFactory = await hre.ethers.getContractFactory("WavePortal");
-  const waveContract = await waveContractFactory.deploy();
-  await waveContract.deployed();
+  //const waveContractFactory = await hre.ethers.getContractFactory("WavePortalV2");
+  //const waveContract = await waveContractFactory.deploy();
 
-  console.log("Contract deployed to: ", waveContract.address);
+  const WavePortalV2 = await ethers.getContractFactory("WavePortalV2");
+  const instance = await upgrades.deployProxy(WavePortalV2, []);
+  
+  await instance.deployed();
+  await owner.sendTransaction({
+    to: instance.address,
+    value: parseEther("1")
+  });
+
+  console.log("Contract deployed to: ", instance.address);
   console.log("Contract deployed by: ", owner.address);
 
-  let waveCount = await waveContract.getTotalWaves();
+  let contractBalance = await hre.ethers.provider.getBalance(instance.address);
+  console.log("Contract balance is: ", ethers.utils.formatEther(contractBalance));
+
+  let waveCount = await instance.getTotalWaves();
   console.log(waveCount.toNumber());
 
-  let waveTx = await waveContract.wave("A message!");
+  let waveTx = await instance.wave("A message!");
   await waveTx.wait();
 
-  waveTx = await waveContract.connect(randoPerson).wave("A random person waving!");
+  waveTx = await instance.connect(randoPerson).wave("A random person waving!");
   await waveTx.wait();
 
-  let allWaves = await waveContract.getAllWaves();
+  contractBalance = await hre.ethers.provider.getBalance(instance.address);
+  console.log("Contract balance is: ", ethers.utils.formatEther(contractBalance));
+
+  let allWaves = await instance.getAllWaves();
   console.log(allWaves);
 
-  waveCount = await waveContract.getTotalWaves();
+  waveCount = await instance.getTotalWaves();
   console.log("Wave count after: ", waveCount.toNumber())
 }
 

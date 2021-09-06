@@ -3,8 +3,9 @@
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract WavePortal {
+contract WavePortal is Initializable {
   uint totalWaves;
 
   event NewWave(address indexed from, uint timestamp, string message);
@@ -17,8 +18,8 @@ contract WavePortal {
 
   Wave[] waves;
   
-  constructor() {
-    console.log("Yo yo, I am a contract and I am smart!");
+  function initialize() public initializer {
+    console.log("Initialized!");
   }
 
   function wave(string memory _message) public {

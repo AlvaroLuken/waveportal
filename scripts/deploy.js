@@ -1,3 +1,5 @@
+const { ethers, upgrades } = require("hardhat");
+
 async function main() {
   const [deployer] = await ethers.getSigners();
 
@@ -6,11 +8,13 @@ async function main() {
   let balance = (await deployer.getBalance());
 
   console.log("Account balance is: ", ethers.utils.formatEther(balance));
-  
-  const Token = await ethers.getContractFactory("WavePortal");
-  const token = await Token.deploy();
 
-  console.log("WavePortal address is at: ", token.address);
+  const WavePortal = await ethers.getContractFactory("WavePortalV3");
+  const instance = await upgrades.deployProxy(WavePortal, []);
+  
+  await instance.deployed();
+
+  console.log("WavePortalV3 Proxy address is at: ", instance.address);
 }
 
 main()
